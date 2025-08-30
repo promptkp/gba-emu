@@ -1,7 +1,6 @@
 #include <SDL3/SDL_render.h>
 #include <iostream>
 #include <SDL3/SDL.h>
-#include <utils.h>
 
 int main() {
   std::cout << "Hello, World!" << std::endl;
