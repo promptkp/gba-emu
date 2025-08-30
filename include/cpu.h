@@ -46,6 +46,7 @@ private:
   };
 
   static constexpr std::size_t kNumInstructionTypes = 15;
+  // TODO double check this
   static constexpr std::array<const InstructionType, kNumInstructionTypes> handlers_ = {{
     { 0x0F000000, 0x0F000000, &Instruction::handleSoftwareInterrupt },
     { 0x0F000010, 0x0E000010, &Instruction::handleCoprocessorRegisterTransfer },
