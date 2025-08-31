@@ -1,4 +1,4 @@
-## TODO
+## TODO (CPU)
  * Instruction decoding (in progress)
  [ ] SWI
  [ ] Coprocessor reg transfer
@@ -20,7 +20,8 @@
   - write test in armv4T assembly
   - learn how to compile to binary
  * Translate cond to bitmask
- * Class member variables for instructions
+ * If a handler handles similar instructions, combine handler and executor.
+ * Add getter/setter for registers
  * CPU fetches
  * CPU executes
  * CPU memory
