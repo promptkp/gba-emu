@@ -46,7 +46,8 @@ private:
   };
 
   static constexpr std::size_t kNumInstructionTypes = 15;
-  // TODO double check this
+
+  // Order matters
   static constexpr std::array<const InstructionType, kNumInstructionTypes> handlers_ = {{
     { 0x0F000000, 0x0F000000, &Instruction::handleSoftwareInterrupt },
     { 0x0F000010, 0x0E000010, &Instruction::handleCoprocessorRegisterTransfer },
@@ -56,7 +57,7 @@ private:
     { 0x0E000000, 0x08000000, &Instruction::handleBlockDataTransfer },
     { 0x0E000010, 0x06000010, &Instruction::handleUndefined },
     { 0x0E000000, 0x06000000, &Instruction::handleSingleDataTransfer },
-    { 0x0FFFFFF0, 0x01FFF210, &Instruction::handleBranchAndExchange },
+    { 0x0FFFFFF0, 0x012FFF10, &Instruction::handleBranchAndExchange },
     { 0x0FB00FF0, 0x01000090, &Instruction::handleSingleDataSwap },
     { 0x0FC000F0, 0x00000090, &Instruction::handleMultiply },
     { 0x0F8000F0, 0x00800090, &Instruction::handleMultiplyLong },
