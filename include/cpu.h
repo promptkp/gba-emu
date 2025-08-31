@@ -16,61 +16,6 @@ enum class Register {
   r1
 };
 
-
-class Instruction {
-public:
-  Instruction(uint32_t encoded_instr_);
-private:
-  void handleSoftwareInterrupt();
-  void handleCoprocessorRegisterTransfer();
-  void handleCoprocessorDataOperation();
-  void handleCoprocessorDataTransfer();
-  void handleBranch();
-  void handleBlockDataTransfer();
-  void handleUndefined();
-  void handleSingleDataTransfer();
-  void handleBranchAndExchange();
-  void handleSingleDataSwap();
-  void handleMultiply();
-  void handleMultiplyLong();
-  void handleHalfwordDataTransferRegister();
-  void handleHalfwordDataTransferImm();
-  void handleDataProcessing();
-
-  // Pointer to member function
-  typedef void (Instruction::*Instruction_pmf)();
-  struct InstructionType {
-    uint32_t mask;
-    uint32_t target;
-    Instruction_pmf handler;
-  };
-
-  static constexpr std::size_t kNumInstructionTypes = 15;
-
-  // Order matters
-  static constexpr std::array<const InstructionType, kNumInstructionTypes> handlers_ = {{
-    { 0x0F000000, 0x0F000000, &Instruction::handleSoftwareInterrupt },
-    { 0x0F000010, 0x0E000010, &Instruction::handleCoprocessorRegisterTransfer },
-    { 0x0F000010, 0x0E000000, &Instruction::handleCoprocessorDataOperation },
-    { 0x0E000000, 0x0C000000, &Instruction::handleCoprocessorDataTransfer },
-    { 0x0E000000, 0x0A000000, &Instruction::handleBranch },
-    { 0x0E000000, 0x08000000, &Instruction::handleBlockDataTransfer },
-    { 0x0E000010, 0x06000010, &Instruction::handleUndefined },
-    { 0x0E000000, 0x06000000, &Instruction::handleSingleDataTransfer },
-    { 0x0FFFFFF0, 0x012FFF10, &Instruction::handleBranchAndExchange },
-    { 0x0FB00FF0, 0x01000090, &Instruction::handleSingleDataSwap },
-    { 0x0FC000F0, 0x00000090, &Instruction::handleMultiply },
-    { 0x0F8000F0, 0x00800090, &Instruction::handleMultiplyLong },
-    { 0x0E400F90, 0x00000090, &Instruction::handleHalfwordDataTransferRegister },
-    { 0x0E400090, 0x00400090, &Instruction::handleHalfwordDataTransferImm },
-    { 0x0E000000, 0x02000000, &Instruction::handleDataProcessing },
-  }};
-
-  const uint32_t encoded_instr_;
-  uint8_t cond;
-  uint8_t opcode;
-};
-
 // Section 2.5
 // Not sure if all states will be used
 enum class OperatingMode {
@@ -89,24 +34,22 @@ class CPU {
 public:
   CPU();
 
-  // Overwrite fetched_instr_
-  void fetch();
+  // Overwrite encoded_instr_
+  void Fetch();
 
-  // Decode fetched_instr_
-  void decode();
+  // Decode and execute encoded_instr_
+  void DecodeAndExecute();
 
-  // Execute decoded_instr_
-  void execute();
-
-  // Do all three
-  void step();
+  // Perform fetch, decode, and execute
+  void Step();
 
   // Section 2.6
   // State and mode defines accesible registers
-  uint32_t readReg(Register reg);
+  uint32_t ReadReg(Register reg);
 
   // Section 2.8
-  void handleException();
+  // TODO: understand how exception works
+  void HandleException();
 
 private:
   /*
@@ -147,6 +90,56 @@ private:
   OperatingState operating_state_;
   OperatingMode operating_mode_;
 
-  uint32_t fetched_instr_;
-  Instruction decoded_instr_;
+  uint32_t encoded_instr_;
+  uint8_t cond_;
+
+  // The pipeline is encoded instruction -> handler -> executor
+  void HandleSoftwareInterrupt();
+  void HandleCoprocessorRegisterTransfer();
+  void HandleCoprocessorDataOperation();
+  void HandleCoprocessorDataTransfer();
+  void HandleBranch();
+  void HandleBlockDataTransfer();
+  void HandleUndefined();
+  void HandleSingleDataTransfer();
+  void HandleBranchAndExchange();
+  void HandleSingleDataSwap();
+  void HandleMultiply();
+  void HandleMultiplyLong();
+  void HandleHalfwordDataTransferRegister();
+  void HandleHalfwordDataTransferImm();
+  void HandleDataProcessing();
+
+  // Might combine handler and executor into one function.
+  // This depends on whether a handler handles similar instr or not.
+  void ExecuteBranch(uint32_t offset, bool isBL);
+  void ExecuteBranchAndExchange(uint8_t reg_n);
+
+  // Pointer to member function
+  using InstructionHandlerPointer = void (CPU::*)();
+  struct InstructionHandler {
+    uint32_t mask;
+    uint32_t target;
+    InstructionHandlerPointer handler;
+  };
+
+  static constexpr std::size_t kNumInstructionTypes = 15;
+  // Order matters
+  static constexpr std::array<const InstructionHandler, kNumInstructionTypes> handlers_ = {{
+    { 0x0F000000, 0x0F000000, &CPU::HandleSoftwareInterrupt },
+    { 0x0F000010, 0x0E000010, &CPU::HandleCoprocessorRegisterTransfer },
+    { 0x0F000010, 0x0E000000, &CPU::HandleCoprocessorDataOperation },
+    { 0x0E000000, 0x0C000000, &CPU::HandleCoprocessorDataTransfer },
+    { 0x0E000000, 0x0A000000, &CPU::HandleBranch },
+    { 0x0E000000, 0x08000000, &CPU::HandleBlockDataTransfer },
+    { 0x0E000010, 0x06000010, &CPU::HandleUndefined },
+    { 0x0E000000, 0x06000000, &CPU::HandleSingleDataTransfer },
+    { 0x0FFFFFF0, 0x012FFF10, &CPU::HandleBranchAndExchange },
+    { 0x0FB00FF0, 0x01000090, &CPU::HandleSingleDataSwap },
+    { 0x0FC000F0, 0x00000090, &CPU::HandleMultiply },
+    { 0x0F8000F0, 0x00800090, &CPU::HandleMultiplyLong },
+    { 0x0E400F90, 0x00000090, &CPU::HandleHalfwordDataTransferRegister },
+    { 0x0E400090, 0x00400090, &CPU::HandleHalfwordDataTransferImm },
+    { 0x0E000000, 0x02000000, &CPU::HandleDataProcessing },
+  }};
 };

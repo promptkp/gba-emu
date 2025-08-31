@@ -1,7 +1,12 @@
 #include <cpu.h>
 #include <iostream>
 
-Instruction::Instruction(uint32_t encoded_instr) : encoded_instr_(encoded_instr) {
+void CPU::DecodeAndExecute() {
+  cond_ = encoded_instr_ >> 28;
+  if (cond_ == 0xF) {
+    std::cerr << "Warning cond is 0b1111; instruction is unpredictable (section A3.2.1)" << std::endl;
+  }
+
   for (const auto& [mask, target, handler] : handlers_) {
     if ((encoded_instr_ & mask) == target) {
       (this->*handler)();
@@ -10,47 +15,62 @@ Instruction::Instruction(uint32_t encoded_instr) : encoded_instr_(encoded_instr)
   std::cerr << "Unknown instr: " << encoded_instr_ << std::endl;
 }
 
-void Instruction::handleSoftwareInterrupt() {
+void CPU::HandleSoftwareInterrupt() {
 }
 
-void Instruction::handleCoprocessorRegisterTransfer() {
+void CPU::HandleCoprocessorRegisterTransfer() {
 }
 
-void Instruction::handleCoprocessorDataOperation() {
+void CPU::HandleCoprocessorDataOperation() {
 }
 
-void Instruction::handleCoprocessorDataTransfer() {
+void CPU::HandleCoprocessorDataTransfer() {
 }
 
-void Instruction::handleBranch() {
+// Handle B, BL (section A4.1.5)
+void CPU::HandleBranch() {
+  uint32_t offset = encoded_instr_ & 0x00FFFFFF;
+
+  // Sign extend 24 to 32 bit
+  if (offset & 0x00800000) {
+    offset |= 0xFF000000;
+  }
+
+  offset = offset << 2;
+  CPU::ExecuteBranch(offset, (encoded_instr_ >> 24) & 1);
 }
 
-void Instruction::handleBlockDataTransfer() {
+void CPU::HandleBlockDataTransfer() {
 }
 
-void Instruction::handleUndefined() {
+void CPU::HandleUndefined() {
 }
 
-void Instruction::handleSingleDataTransfer() {
+void CPU::HandleSingleDataTransfer() {
 }
 
-void Instruction::handleBranchAndExchange() {
+// Handle BX (section A4.1.10)
+void CPU::HandleBranchAndExchange() {
+  CPU::ExecuteBranchAndExchange((uint8_t)(encoded_instr_ & 0xF));
 }
 
-void Instruction::handleSingleDataSwap() {
+void CPU::HandleSingleDataSwap() {
 }
 
-void Instruction::handleMultiply() {
+void CPU::HandleMultiply() {
 }
 
-void Instruction::handleMultiplyLong() {
+void CPU::HandleMultiplyLong() {
 }
 
-void Instruction::handleHalfwordDataTransferRegister() {
+void CPU::HandleHalfwordDataTransferRegister() {
 }
 
-void Instruction::handleHalfwordDataTransferImm() {
+void CPU::HandleHalfwordDataTransferImm() {
 }
 
-void Instruction::handleDataProcessing() {
+void CPU::HandleDataProcessing() {
 }
+
+void CPU::ExecuteBranch(uint32_t offset, bool isBL) {}
+void CPU::ExecuteBranchAndExchange(uint8_t reg_n) {}
