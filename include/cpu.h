@@ -110,11 +110,6 @@ private:
   void HandleHalfwordDataTransferImm();
   void HandleDataProcessing();
 
-  // Might combine handler and executor into one function.
-  // This depends on whether a handler handles similar instr or not.
-  void ExecuteBranch(uint32_t offset, bool isBL);
-  void ExecuteBranchAndExchange(uint8_t reg_n);
-
   // Pointer to member function
   using InstructionHandlerPointer = void (CPU::*)();
   struct InstructionHandler {
@@ -141,5 +136,55 @@ private:
     { 0x0E400F90, 0x00000090, &CPU::HandleHalfwordDataTransferRegister },
     { 0x0E400090, 0x00400090, &CPU::HandleHalfwordDataTransferImm },
     { 0x0E000000, 0x02000000, &CPU::HandleDataProcessing },
+  }};
+
+  // Might combine handler and executor into one function.
+  // This depends on whether a handler handles similar instr or not.
+  void ExecuteBranch(uint32_t offset, bool isBL);
+  void ExecuteBranchAndExchange(uint8_t reg_n);
+
+  // Data Processing Executors
+  void ExecuteAND(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+  void ExecuteEOR(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+  void ExecuteSUB(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+  void ExecuteRSB(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+  void ExecuteADD(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+  void ExecuteADC(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+  void ExecuteSBC(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+  void ExecuteRSC(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+  void ExecuteTST(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+  void ExecuteTEQ(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+  void ExecuteCMP(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+  void ExecuteCMN(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+  void ExecuteORR(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+  void ExecuteMOV(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+  void ExecuteBIC(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+  void ExecuteMVN(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+
+  using DataProcessingExecutorPointer = void (CPU::*)(uint8_t, uint8_t, uint16_t, bool, bool);
+  struct DataProcessingExecutor {
+    uint8_t opcode;
+    DataProcessingExecutorPointer executor;
+  };
+
+  // Index is the opcode for each data processing instruction
+  static constexpr std::size_t kNumDataProcessingInstr = 16;
+  static constexpr std::array<const DataProcessingExecutorPointer, kNumDataProcessingInstr> data_processing_executors_ = {{
+    &CPU::ExecuteAND,
+    &CPU::ExecuteEOR,
+    &CPU::ExecuteSUB,
+    &CPU::ExecuteRSB,
+    &CPU::ExecuteADD,
+    &CPU::ExecuteADC,
+    &CPU::ExecuteSBC,
+    &CPU::ExecuteRSC,
+    &CPU::ExecuteTST,
+    &CPU::ExecuteTEQ,
+    &CPU::ExecuteCMP,
+    &CPU::ExecuteCMN,
+    &CPU::ExecuteORR,
+    &CPU::ExecuteMOV,
+    &CPU::ExecuteBIC,
+    &CPU::ExecuteMVN
   }};
 };
