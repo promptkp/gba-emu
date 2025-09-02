@@ -25,6 +25,9 @@
  [ ] 16 data processing
  [ ] MUL
  [ ] MLA
+ [ ] MRS
+ [ ] MSR (three types)
+
 
  * shifter operand for data processing (addressing mode 1)
  * load/store word/unsigned byte (addressing mode 2)

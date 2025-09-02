@@ -118,9 +118,8 @@ private:
     InstructionHandlerPointer handler;
   };
 
-  static constexpr std::size_t kNumInstructionTypes = 15;
   // Order matters
-  static constexpr std::array<const InstructionHandler, kNumInstructionTypes> handlers_ = {{
+  static constexpr std::array<const InstructionHandler, 15> handlers_ = {{
     { 0x0F000000, 0x0F000000, &CPU::HandleSoftwareInterrupt },
     { 0x0F000010, 0x0E000010, &CPU::HandleCoprocessorRegisterTransfer },
     { 0x0F000010, 0x0E000000, &CPU::HandleCoprocessorDataOperation },
@@ -168,8 +167,7 @@ private:
   };
 
   // Index is the opcode for each data processing instruction
-  static constexpr std::size_t kNumDataProcessingInstr = 16;
-  static constexpr std::array<const DataProcessingExecutorPointer, kNumDataProcessingInstr> data_processing_executors_ = {{
+  static constexpr std::array<const DataProcessingExecutorPointer, 16> data_processing_executors_ = {{
     &CPU::ExecuteAND,
     &CPU::ExecuteEOR,
     &CPU::ExecuteSUB,
@@ -197,4 +195,10 @@ private:
   void ExecuteUMLAL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_n, uint8_t reg_m, bool s_bit);
   void ExecuteSMULL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_n, uint8_t reg_m, bool s_bit);
   void ExecuteSMLAL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_n, uint8_t reg_m, bool s_bit);
+
+  // PSR transfer
+  void ExecuteMRS();
+  void ExecuteMSRregToPSR();
+  void ExecuteMSRregToFlag();
+  void ExecuteMSRimmToFlag();
 };

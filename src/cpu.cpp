@@ -46,22 +46,18 @@ void CPU::HandleBlockDataTransfer() {
 void CPU::HandleUndefined() {
 }
 
-// Handle LDR, LDRT, LDRB, LDRBT
 void CPU::HandleSingleDataTransfer() {
-  // bit 25 is i-bit, but in armv4T manual, the i-bit is always 1
+  bool i_bit = (encoded_instr_ >> 25) & 1;
   bool p_bit = (encoded_instr_ >> 24) & 1;
   bool u_bit = (encoded_instr_ >> 23) & 1;
-  bool b_bit = (encoded_instr_ >> 22) & 1; // unsigned byte or word
+  bool b_bit = (encoded_instr_ >> 22) & 1;
   bool w_bit = (encoded_instr_ >> 21) & 1;
   bool l_bit = (encoded_instr_ >> 20) & 1;
   uint8_t reg_n = (encoded_instr_ >> 16) & 0xF;
   uint8_t reg_d = (encoded_instr_ >> 16) & 0xF;
   uint16_t offset = encoded_instr_ & 0xFFF;
 
-  if (p_bit == 0) {
-    // post-index addressing
-
-  }
+  // TODO: decision tree
 }
 
 // Handle BX (section A4.1.10)
@@ -119,6 +115,7 @@ void CPU::HandleHalfwordDataTransferRegister() {
 void CPU::HandleHalfwordDataTransferImm() {
 }
 
+// Handle 16 opcodes + PSR transfer (MRS, MSR)
 void CPU::HandleDataProcessing() {
   bool i_bit = (encoded_instr_ >> 25) & 1;
   bool s_bit = (encoded_instr_ >> 20) & 1;
@@ -126,6 +123,21 @@ void CPU::HandleDataProcessing() {
   uint8_t reg_n = (encoded_instr_ >> 16) & 0xF;
   uint8_t reg_d = (encoded_instr_ >> 12) & 0xF;
   uint16_t shifter_operand = encoded_instr_ & 0xFFF;
+
+  // Check for PSR transfer instructions first
+  // These executors take different arguments, so decode them within each executor
+  static constexpr std::array<const InstructionHandler, 4> psr_transfer_executor = {{
+    { 0x0FBF0FFF, 0x010F0000, &CPU::ExecuteMRS },
+    { 0x0FBFFFF0, 0x0129F000, &CPU::ExecuteMSRregToPSR },
+    { 0x0DBFF000, 0x0128F000, &CPU::ExecuteMSRregToFlag },
+    { 0x0DBFF000, 0x0328F000, &CPU::ExecuteMSRimmToFlag },
+  }};
+
+  for (const auto& [mask, target, executor] : psr_transfer_executor) {
+    if ((encoded_instr_ & mask) == target) {
+      (this->*executor)();
+    }
+  }
 
   (this->*data_processing_executors_[opcode])(reg_d, reg_n, shifter_operand, i_bit, s_bit);
 }
@@ -159,3 +171,9 @@ void CPU::ExecuteUMULL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_m, uint8_
 void CPU::ExecuteUMLAL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_m, uint8_t reg_s, bool s_bit) {}
 void CPU::ExecuteSMULL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_m, uint8_t reg_s, bool s_bit) {}
 void CPU::ExecuteSMLAL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_m, uint8_t reg_s, bool s_bit) {}
+
+// TODO
+void CPU::ExecuteMRS() {}
+void CPU::ExecuteMSRregToPSR() {}
+void CPU::ExecuteMSRregToFlag() {}
+void CPU::ExecuteMSRimmToFlag() {}
