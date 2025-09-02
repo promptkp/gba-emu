@@ -25,6 +25,7 @@
  [ ] MLA
 
  * shifter operand for data processing
+ * Thumb decoder, handler, executor
 
  * Write test cases for fetch, decode, execute
   - write test in armv4T assembly
