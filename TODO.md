@@ -16,6 +16,8 @@
  [x] Multiply
  [x] Data processing 
 
+ Don't know which group section 3.10 belongs to.
+
  * Instruction executors (not started, make sure this list covers every instruction in armv4T manual)
  [ ] B
  [ ] BL
@@ -24,7 +26,10 @@
  [ ] MUL
  [ ] MLA
 
- * shifter operand for data processing
+ * shifter operand for data processing (addressing mode 1)
+ * load/store word/unsigned byte (addressing mode 2)
+ * load/store halfword (addressing mode 3)
+ * load/store multiple (addressing mode 4)
  * Thumb decoder, handler, executor
 
  * Write test cases for fetch, decode, execute

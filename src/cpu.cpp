@@ -47,6 +47,15 @@ void CPU::HandleUndefined() {
 }
 
 void CPU::HandleSingleDataTransfer() {
+  // bit 25 is i-bit, but maybe armv4T doesn't support i-bit == 0
+  bool p_bit = (encoded_instr_ >> 24) & 1;
+  bool u_bit = (encoded_instr_ >> 23) & 1;
+  bool b_bit = (encoded_instr_ >> 22) & 1;
+  bool w_bit = (encoded_instr_ >> 21) & 1;
+  bool l_bit = (encoded_instr_ >> 20) & 1;
+  uint8_t reg_n = (encoded_instr_ >> 16) & 0xF;
+  uint8_t reg_d = (encoded_instr_ >> 16) & 0xF;
+  uint16_t offset = encoded_instr_ & 0xFFF;
 }
 
 // Handle BX (section A4.1.10)
