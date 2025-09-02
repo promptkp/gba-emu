@@ -111,27 +111,9 @@ void CPU::HandleMultiplyLong() {
 }
 
 void CPU::HandleHalfwordDataTransferRegister() {
-  bool p_bit = (encoded_instr_ >> 24) & 1;
-  bool u_bit = (encoded_instr_ >> 23) & 1;
-  bool w_bit = (encoded_instr_ >> 21) & 1;
-  bool l_bit = (encoded_instr_ >> 20) & 1;
-  uint8_t reg_n = (encoded_instr_ >> 16) & 0xF;
-  uint8_t reg_d = (encoded_instr_ >> 12) & 0xF;
-  bool s_bit = (encoded_instr_ >> 6) & 1;
-  bool h_bit = (encoded_instr_ >> 5) & 1;
-  uint8_t reg_m = encoded_instr_ & 0xF;
 }
 
 void CPU::HandleHalfwordDataTransferImm() {
-  bool p_bit = (encoded_instr_ >> 24) & 1;
-  bool u_bit = (encoded_instr_ >> 23) & 1;
-  bool w_bit = (encoded_instr_ >> 21) & 1;
-  bool l_bit = (encoded_instr_ >> 20) & 1;
-  uint8_t reg_n = (encoded_instr_ >> 16) & 0xF;
-  uint8_t reg_d = (encoded_instr_ >> 12) & 0xF;
-  bool s_bit = (encoded_instr_ >> 6) & 1;
-  bool h_bit = (encoded_instr_ >> 5) & 1;
-  uint8_t offset = ((encoded_instr_ >> 4) & 0xF0) | (encoded_instr_ & 0xF);
 }
 
 // Handle 16 opcodes + PSR transfer (MRS, MSR)
@@ -191,18 +173,11 @@ void CPU::ExecuteUMLAL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_m, uint8_
 void CPU::ExecuteSMULL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_m, uint8_t reg_s, bool s_bit) {}
 void CPU::ExecuteSMLAL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_m, uint8_t reg_s, bool s_bit) {}
 
-// TODO: PSR Transfer
+// TODO
 void CPU::ExecuteMRS() {}
 void CPU::ExecuteMSRregToPSR() {}
 void CPU::ExecuteMSRregToFlag() {}
 void CPU::ExecuteMSRimmToFlag() {}
 
-// TODO: Memory ops
 void CPU::ExecuteLDRSTR(bool i_bit, bool p_bit, bool u_bit, bool b_bit, bool w_bit, bool l_bit,
                    uint8_t reg_n, uint8_t reg_d, uint16_t offset) {}
-void CPU::ExecuteHalfwordReg(bool p_bit, bool u_bit, bool w_bit, bool l_bit,
-                             uint8_t reg_n, uint8_t reg_d, bool s_bit, bool
-                             h_bit, uint8_t reg_m) {}
-void CPU::ExecuteHalfwordImm(bool p_bit, bool u_bit, bool w_bit, bool l_bit,
-                             uint8_t reg_n, uint8_t reg_d, bool s_bit, bool
-                             h_bit, uint8_t offset) {}

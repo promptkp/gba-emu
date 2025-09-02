@@ -7,7 +7,7 @@
  [x] Branch
  [ ] Block data transfer
  [ ] Undefined
- [ ] Single data transfer
+ [x] Single data transfer
  [ ] Halfword data transfer, imm offset
  [ ] Halfword data transfer, reg offset
  [x] Branch and exchange
@@ -27,6 +27,10 @@
  [ ] MLA
  [ ] MRS
  [ ] MSR (three types)
+ [ ] LDR(B)
+ [ ] STR(B)
+ [ ] LDR(H/SH/SB)
+ [ ] STRSH
 
 
  * shifter operand for data processing (addressing mode 1)
@@ -34,6 +38,7 @@
  * load/store halfword (addressing mode 3)
  * load/store multiple (addressing mode 4)
  * Thumb decoder, handler, executor
+ * check how to use BIGEND signal
 
  * Write test cases for fetch, decode, execute
   - write test in armv4T assembly

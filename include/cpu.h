@@ -10,12 +10,6 @@ enum class OperatingState {
   Thumb
 };
 
-// Section 2.6
-enum class Register {
-  r0,
-  r1
-};
-
 // Section 2.5
 // Not sure if all states will be used
 enum class OperatingMode {
@@ -45,7 +39,12 @@ public:
 
   // Section 2.6
   // State and mode defines accesible registers
-  uint32_t ReadReg(Register reg);
+  uint32_t ReadReg(uint8_t reg);
+  uint32_t ReadReg(uint8_t reg, OperatingMode mode);
+  void WriteReg(uint8_t reg, uint32_t val);
+  void WriteReg(uint8_t reg, OperatingMode mode, uint32_t val);
+  uint32_t ReadStatusReg(uint8_t reg);
+  void WriteStatusReg(uint8_t reg, uint32_t val);
 
   // Section 2.8
   // TODO: understand how exception works
@@ -201,4 +200,14 @@ private:
   void ExecuteMSRregToPSR();
   void ExecuteMSRregToFlag();
   void ExecuteMSRimmToFlag();
+
+  // Mem ops
+  void ExecuteLDRSTR(bool i_bit, bool p_bit, bool u_bit, bool b_bit, bool w_bit, bool l_bit,
+                     uint8_t reg_n, uint8_t reg_d, uint16_t offset);
+  void ExecuteHalfwordReg(bool p_bit, bool u_bit, bool w_bit, bool l_bit,
+                          uint8_t reg_n, uint8_t reg_d, bool s_bit, bool h_bit,
+                          uint8_t reg_m);
+  void ExecuteHalfwordImm(bool p_bit, bool u_bit, bool w_bit, bool l_bit,
+                          uint8_t reg_n, uint8_t reg_d, bool s_bit, bool h_bit,
+                          uint8_t offset);
 };
