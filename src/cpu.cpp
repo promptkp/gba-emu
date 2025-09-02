@@ -67,14 +67,21 @@ void CPU::HandleMultiply() {
   uint8_t reg_m = encoded_instr_ & 0xF;
 
   if (a_bit) {
-    ExecuteMLA(reg_d, reg_n, reg_s, reg_m);
+    ExecuteMLA(reg_d, reg_n, reg_s, reg_m, s_bit);
   } else {
-    ExecuteMUL(reg_d, reg_n, reg_s, reg_m);
+    ExecuteMUL(reg_d, reg_n, reg_s, reg_m, s_bit);
   }
 }
 
 // Handle UMULL, UMLAL, SMULL, SMLAL
 void CPU::HandleMultiplyLong() {
+  bool u_bit = (encoded_instr_ >> 22) & 1;
+  bool a_bit = (encoded_instr_ >> 21) & 1;
+  bool s_bit = (encoded_instr_ >> 20) & 1;
+  uint8_t reg_d_hi = (encoded_instr_ >> 16) & 0xF;
+  uint8_t reg_d_lo = (encoded_instr_ >> 12) & 0xF;
+  uint8_t reg_n = (encoded_instr_ >> 8) & 0xF;
+  uint8_t reg_m = encoded_instr_ & 0xF;
 }
 
 void CPU::HandleHalfwordDataTransferRegister() {
@@ -115,5 +122,5 @@ void CPU::ExecuteBIC(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, boo
 void CPU::ExecuteMVN(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit) {}
 
 // TODO: Normal multiply
-void CPU::ExecuteMLA(uint8_t reg_d, uint8_t reg_n, uint8_t reg_s, uint8_t reg_m) {}
-void CPU::ExecuteMUL(uint8_t reg_d, uint8_t reg_n, uint8_t reg_s, uint8_t reg_m) {}
+void CPU::ExecuteMLA(uint8_t reg_d, uint8_t reg_n, uint8_t reg_s, uint8_t reg_m, bool s_bit) {}
+void CPU::ExecuteMUL(uint8_t reg_d, uint8_t reg_n, uint8_t reg_s, uint8_t reg_m, bool s_bit) {}
