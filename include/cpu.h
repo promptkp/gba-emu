@@ -191,10 +191,10 @@ private:
   void ExecuteMUL(uint8_t reg_d, uint8_t reg_n, uint8_t reg_s, uint8_t reg_m, bool s_bit); // reg_n unused
 
   // Long multiply
-  void ExecuteUMULL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_n, uint8_t reg_m, bool s_bit);
-  void ExecuteUMLAL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_n, uint8_t reg_m, bool s_bit);
-  void ExecuteSMULL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_n, uint8_t reg_m, bool s_bit);
-  void ExecuteSMLAL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_n, uint8_t reg_m, bool s_bit);
+  void ExecuteUMULL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_s, uint8_t reg_m, bool s_bit);
+  void ExecuteUMLAL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_s, uint8_t reg_m, bool s_bit);
+  void ExecuteSMULL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_s, uint8_t reg_m, bool s_bit);
+  void ExecuteSMLAL(uint8_t reg_d_hi, uint8_t reg_d_lo, uint8_t reg_s, uint8_t reg_m, bool s_bit);
 
   // PSR transfer
   void ExecuteMRS();

@@ -91,20 +91,20 @@ void CPU::HandleMultiplyLong() {
   bool s_bit = (encoded_instr_ >> 20) & 1;
   uint8_t reg_d_hi = (encoded_instr_ >> 16) & 0xF;
   uint8_t reg_d_lo = (encoded_instr_ >> 12) & 0xF;
-  uint8_t reg_n = (encoded_instr_ >> 8) & 0xF;
+  uint8_t reg_s = (encoded_instr_ >> 8) & 0xF;
   uint8_t reg_m = encoded_instr_ & 0xF;
 
   if (u_bit) {
     if (a_bit) {
-      ExecuteUMLAL(reg_d_hi, reg_d_lo, reg_n, reg_m, s_bit);
+      ExecuteUMLAL(reg_d_hi, reg_d_lo, reg_s, reg_m, s_bit);
     } else {
-      ExecuteUMULL(reg_d_hi, reg_d_lo, reg_n, reg_m, s_bit);
+      ExecuteUMULL(reg_d_hi, reg_d_lo, reg_s, reg_m, s_bit);
     }
   } else {
     if (a_bit) {
-      ExecuteSMLAL(reg_d_hi, reg_d_lo, reg_n, reg_m, s_bit);
+      ExecuteSMLAL(reg_d_hi, reg_d_lo, reg_s, reg_m, s_bit);
     } else {
-      ExecuteSMULL(reg_d_hi, reg_d_lo, reg_n, reg_m, s_bit);
+      ExecuteSMULL(reg_d_hi, reg_d_lo, reg_s, reg_m, s_bit);
     }
   }
 }
