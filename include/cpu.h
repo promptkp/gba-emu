@@ -128,7 +128,8 @@ private:
     { 0x0E000000, 0x0A000000, &CPU::HandleBranch },
     { 0x0E000000, 0x08000000, &CPU::HandleBlockDataTransfer },
     { 0x0E000010, 0x06000010, &CPU::HandleUndefined },
-    { 0x0E000000, 0x06000000, &CPU::HandleSingleDataTransfer },
+    { 0x0C000000, 0x04000000, &CPU::HandleSingleDataTransfer },
+
     { 0x0FFFFFF0, 0x012FFF10, &CPU::HandleBranchAndExchange },
     { 0x0FB00FF0, 0x01000090, &CPU::HandleSingleDataSwap },
     { 0x0FC000F0, 0x00000090, &CPU::HandleMultiply },
