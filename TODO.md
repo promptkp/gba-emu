@@ -13,7 +13,7 @@
  [x] Branch and exchange
  [ ] Single data swap
  [ ] Multiply long
- [ ] Multiply
+ [x] Multiply
  [x] Data processing 
 
  * Instruction executors (not started, make sure this list covers every instruction in armv4T manual)
@@ -21,6 +21,10 @@
  [ ] BL
  [ ] BLX
  [ ] 16 data processing
+ [ ] MUL
+ [ ] MLA
+
+ * shifter operand for data processing
 
  * Write test cases for fetch, decode, execute
   - write test in armv4T assembly

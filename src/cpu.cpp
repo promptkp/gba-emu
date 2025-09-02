@@ -57,9 +57,23 @@ void CPU::HandleBranchAndExchange() {
 void CPU::HandleSingleDataSwap() {
 }
 
+// Handle MUL, MLA
 void CPU::HandleMultiply() {
+  bool a_bit = (encoded_instr_ >> 21) & 1;
+  bool s_bit = (encoded_instr_ >> 20) & 1;
+  uint8_t reg_d = (encoded_instr_ >> 16) & 0xF;
+  uint8_t reg_n = (encoded_instr_ >> 12) & 0xF;
+  uint8_t reg_s = (encoded_instr_ >> 8) & 0xF;
+  uint8_t reg_m = encoded_instr_ & 0xF;
+
+  if (a_bit) {
+    ExecuteMLA(reg_d, reg_n, reg_s, reg_m);
+  } else {
+    ExecuteMUL(reg_d, reg_n, reg_s, reg_m);
+  }
 }
 
+// Handle UMULL, UMLAL, SMULL, SMLAL
 void CPU::HandleMultiplyLong() {
 }
 
@@ -80,7 +94,7 @@ void CPU::HandleDataProcessing() {
   (this->*data_processing_executors_[opcode])(reg_d, reg_n, shifter_operand, i_bit, s_bit);
 }
 
-// TODO
+// TODO: data processing
 void CPU::ExecuteBranch(uint32_t offset, bool isBL) {}
 void CPU::ExecuteBranchAndExchange(uint8_t reg_n) {}
 void CPU::ExecuteAND(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit) {}
@@ -99,3 +113,7 @@ void CPU::ExecuteORR(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, boo
 void CPU::ExecuteMOV(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit) {}
 void CPU::ExecuteBIC(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit) {}
 void CPU::ExecuteMVN(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit) {}
+
+// TODO: Normal multiply
+void CPU::ExecuteMLA(uint8_t reg_d, uint8_t reg_n, uint8_t reg_s, uint8_t reg_m) {}
+void CPU::ExecuteMUL(uint8_t reg_d, uint8_t reg_n, uint8_t reg_s, uint8_t reg_m) {}

@@ -187,4 +187,9 @@ private:
     &CPU::ExecuteBIC,
     &CPU::ExecuteMVN
   }};
+
+  // Multiply
+  void ExecuteMLA(uint8_t reg_d, uint8_t reg_n, uint8_t reg_s, uint8_t reg_m);
+  // reg_n unused
+  void ExecuteMUL(uint8_t reg_d, uint8_t reg_n, uint8_t reg_s, uint8_t reg_m);
 };
