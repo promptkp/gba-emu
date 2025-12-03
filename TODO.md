@@ -49,3 +49,5 @@
  * CPU fetches
  * CPU executes
  * CPU memory
+
+ - difference between pragma once, and ifndef def at the start of header files.
