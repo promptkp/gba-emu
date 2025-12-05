@@ -1,0 +1,85 @@
+#!/usr/bin/env python3
+
+from utils import *
+
+"""
+Assemble into ELF then into raw machine code bytes:
+
+    arm-none-eabi-as -mcpu=arm7tdmi test_assembly.s
+    arm-none-eabi-objcopy -O binary a.out a.bin
+"""
+
+"""
+Mov:
+    Reg
+        shift by imm/reg
+        shift type
+    Imm
+        8bit imm
+        shift by imm
+
+Then, we have the Movs of course.
+"""
+
+tests = [
+    {
+        "name": "test_one_mov_imm",
+        "assembly": """
+            mov     r0, #1
+        """,
+        "checks": [
+            reg_equal("r0", 1),
+        ],
+    },
+    {
+        "name": "test_one_mov_imm_shifted",
+        "assembly": """
+            mov     r0, #0x00011000
+        """,
+        "checks": [
+            reg_equal("r0", 0x00011000),
+        ],
+    },
+    {
+        "name": "test_one_mov_reg",
+        "assembly": """
+            mov     r0, #1
+            mov     r1, r0
+        """,
+        "checks": [
+            reg_equal("r0", 1),
+            reg_equal("r1", 1),
+        ],
+    },
+    {
+        "name": "test_one_mov_reg_lsl_reg",
+        "assembly": """
+            mov     r0, #1
+            mov     r1, #4
+            mov     r2, r0, lsl r1
+        """,
+        "checks": [
+            reg_equal("r2", 1 << 4)
+        ],
+    },
+    {
+        "name": "test_one_mov_reg_lsl_imm",
+        "assembly": """
+            mov     r0, #1
+            mov     r1, r0, lsl #4
+        """,
+        "checks": [
+            reg_equal("r1", 1 << 4)
+        ],
+    },
+]
+
+for test in tests:
+    input = test["assembly"]
+    checks = test["checks"]
+    test_bin = compile(input)
+    cpu = CPU()
+    cpu.run(test_bin)
+    for check in checks:
+        cpu.check(check)
+
