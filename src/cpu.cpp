@@ -5,7 +5,7 @@ CPU::CPU() {
 
 }
 
-void CPU::RunTest(char *test_file) {
+void CPU::RunTest(std::vector<std::byte> &buffer) {
 
 }
 

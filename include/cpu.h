@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <array>
+#include <vector>
 
 // Section 2.2
 enum class OperatingState {
@@ -28,7 +29,7 @@ class CPU {
 public:
   CPU();
 
-  void RunTest(char *test_file);
+  void RunTest(std::vector<std::byte> &buffer);
   void PrintRegister();
 
   // Overwrite encoded_instr_
