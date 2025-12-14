@@ -10,7 +10,7 @@ void CPU::RunTest(std::vector<std::byte> &buffer) {
 }
 
 void CPU::PrintRegister() {
-
+  std::cout << "Print Register" << std::endl;
 }
 
 void CPU::DecodeAndExecute() {

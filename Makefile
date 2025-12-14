@@ -32,3 +32,6 @@ test_cpu:  $(TEST_CPU_TARGET)
 $(TEST_CPU_TARGET): $(OBJ_DIR)/test_cpu.o $(OBJ_DIR)/cpu.o
 	@mkdir -p $(BIN_DIR)
 	$(CXX) $^ -o $@
+
+test: test_cpu
+	python test/main.py

@@ -74,12 +74,21 @@ tests = [
     },
 ]
 
+remove_old_and_create_new_tmp_dir()
+
 for test in tests:
+    name = test["name"]
     input = test["assembly"]
     checks = test["checks"]
-    test_bin = compile(input)
+    test_bin = compile(name, input)
+
+    if test_bin is None:
+        print(f"Error in {name}, skipping.")
     cpu = CPU()
     cpu.run(test_bin)
     for check in checks:
         cpu.check(check)
 
+clean_up_tmp_dir()
+
+print("All tests passed!")
