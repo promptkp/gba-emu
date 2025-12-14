@@ -5,6 +5,9 @@ def compile(assembly):
     pass
 
 class CPU():
+    def __init__(self):
+        pass
+
     def run(self, bin):
         pass
 

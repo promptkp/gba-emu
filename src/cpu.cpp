@@ -1,6 +1,18 @@
 #include <cpu.h>
 #include <iostream>
 
+CPU::CPU() {
+
+}
+
+void CPU::RunTest(char *test_file) {
+
+}
+
+void CPU::PrintRegister() {
+
+}
+
 void CPU::DecodeAndExecute() {
   cond_ = encoded_instr_ >> 28;
   if (cond_ == 0xF) {

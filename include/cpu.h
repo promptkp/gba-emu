@@ -28,6 +28,9 @@ class CPU {
 public:
   CPU();
 
+  void RunTest(char *test_file);
+  void PrintRegister();
+
   // Overwrite encoded_instr_
   void Fetch();
 

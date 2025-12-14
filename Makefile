@@ -16,7 +16,7 @@ all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
 	@mkdir -p $(BIN_DIR)
-	$(CXX) $(OBJECTS) $(LDFLAGS) -o $(TARGET)
+	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(OBJ_DIR)
@@ -24,3 +24,11 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
+
+TEST_CPU_TARGET = $(BIN_DIR)/test_cpu
+
+test_cpu:  $(TEST_CPU_TARGET)
+
+$(TEST_CPU_TARGET): $(OBJ_DIR)/test_cpu.o $(OBJ_DIR)/cpu.o
+	@mkdir -p $(BIN_DIR)
+	$(CXX) $^ -o $@
