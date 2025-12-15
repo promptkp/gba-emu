@@ -30,6 +30,8 @@ public:
   CPU();
 
   void RunTest(std::vector<std::byte> &buffer);
+
+  // For testing
   void PrintRegister();
 
   // Overwrite encoded_instr_
@@ -47,7 +49,9 @@ public:
   uint32_t ReadReg(uint8_t reg, OperatingMode mode);
   void WriteReg(uint8_t reg, uint32_t val);
   void WriteReg(uint8_t reg, OperatingMode mode, uint32_t val);
-  uint32_t ReadStatusReg(uint8_t reg);
+  uint32_t ReadStatusReg();
+  uint32_t ReadStatusReg(OperatingMode mode);
+  uint32_t ReadCPSR();
   void WriteStatusReg(uint8_t reg, uint32_t val);
 
   // Section 2.8

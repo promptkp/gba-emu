@@ -5,12 +5,43 @@ CPU::CPU() {
 
 }
 
-void CPU::RunTest(std::vector<std::byte> &buffer) {
+uint32_t CPU::ReadStatusReg(OperatingMode mode) {return 0;}
+uint32_t CPU::ReadReg(uint8_t reg, OperatingMode mode) {return 0;}
+uint32_t CPU::ReadCPSR() {return 0;}
 
+void CPU::RunTest(std::vector<std::byte> &buffer) {
 }
 
 void CPU::PrintRegister() {
-  std::cout << "Print Register" << std::endl;
+  // 16 regs
+  for (int i = 0; i < 16; ++i) {
+    std::cout << "r" << i << "," << ReadReg(i, OperatingMode::User) << std::endl;
+  }
+
+  // 5 regs
+  for (int i = 8; i <= 12; ++i) {
+    std::cout << "r" << i << "_fiq," << ReadReg(i, OperatingMode::FastInterrupt) << std::endl;
+  }
+
+  std::pair<OperatingMode, std::string> r13_14_spsr_banked_mode[] = {
+    {OperatingMode::FastInterrupt, "fiq"},
+    {OperatingMode::Supervisor, "svc"},
+    {OperatingMode::Abort, "abt"},
+    {OperatingMode::Interrupt, "irq"},
+    {OperatingMode::Undefined, "und"}
+  };
+
+  // 5 * 3 = 15 regs
+  for (auto &[mode, name] : r13_14_spsr_banked_mode) {
+    for (int i = 13; i <= 14; ++i) {
+      std::cout << "r" << i << "_" << name << "," << ReadReg(i, mode) << std::endl;;
+    }
+
+    std::cout << "spsr" << "_" << name << "," << ReadStatusReg(mode) << std::endl;
+  }
+
+  // 1 reg
+  std::cout << "cpsr" << "," << ReadCPSR() << std::endl;
 }
 
 void CPU::DecodeAndExecute() {
