@@ -8,7 +8,12 @@ int main(int argc, char *argv[]) {
   std::cerr << "CPU test!" << std::endl;
 
   if (argc != 2) {
-    std::cerr << "argc != 2 (expecting file name as first argument)" << std::endl;
+    std::cerr << "argc != 2 (expecting file name as first argument), but got argc == " << argc << std::endl;
+    std::cerr << "Arguments: " << std::endl;
+    for (int i = 0; i < argc; ++i) {
+      std::cerr << argv[i] << " ";
+    }
+    std::cerr << std::endl;
     return -1;
   }
 

@@ -2,3 +2,4 @@ bin/
 obj/
 .clangd
 *__pycache__*
+tmp*

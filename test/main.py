@@ -76,6 +76,7 @@ tests = [
 
 remove_old_and_create_new_tmp_dir()
 
+failed_tests = []
 for test in tests:
     name = test["name"]
     input = test["assembly"]
@@ -84,11 +85,27 @@ for test in tests:
 
     if test_bin is None:
         print(f"Error in {name}, skipping.")
-    cpu = CPU()
-    cpu.run(test_bin)
-    for check in checks:
-        cpu.check(check)
+        failed_tests.append(name)
+        continue
+
+    test_output = run_bin(name, test_bin)
+
+    if test_output is None:
+        print(f"Error running binary {name}, skipping")
+        failed_tests.append(name)
+        continue
+
+    ok = run_checks(test_output, checks)
+    if not ok:
+        print(f"Checks failed for {name}, skipping")
+        failed_tests.append(name)
+        continue
+
+    print(f"{name}: Passed!")
+
+if len(failed_tests) == 0:
+    print("All tests passed!")
+else:
+    print(f"{len(failed_tests)} tests failed.")
 
 clean_up_tmp_dir()
-
-print("All tests passed!")

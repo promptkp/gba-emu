@@ -4,6 +4,7 @@ import shutil
 import subprocess
 
 TMP_BIN_DIR = "tmp_bin_dir"
+TEST_CPU_BIN = "bin/test_cpu"
 
 def remove_old_and_create_new_tmp_dir():
     tmp_bin_dir = Path(TMP_BIN_DIR)
@@ -52,12 +53,26 @@ def compile(name, assembly):
 def reg_equal(src, expected):
     pass
 
-class CPU():
-    def __init__(self):
-        pass
+def run_bin(name, bin):
+    """
+    Returns output file name
+    """
+    output_file = Path(TMP_BIN_DIR, name + "_output")
+    result = subprocess.run(
+        [Path(TEST_CPU_BIN), bin],
+        capture_output=True,
+        text=True,
+    )
 
-    def run(self, bin):
-        pass
+    if result.returncode != 0:
+        print(f"{name}: Failed when running binary")
+        return None
 
-    def check(self, expr):
-        pass
+    with open(output_file, "w") as f:
+        f.write(result.stdout)
+
+    return output_file
+
+# todo: Implement
+def run_checks(output, checks):
+    return True
