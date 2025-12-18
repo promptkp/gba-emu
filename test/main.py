@@ -34,10 +34,10 @@ tests = [
     {
         "name": "test_one_mov_imm_shifted",
         "assembly": """
-            mov     r0, #0x00011000
+            mov     r0, #0x00010000
         """,
         "checks": [
-            RegEqual("r0", 0x00011000),
+            RegEqual("r0", 0x00010000),
         ],
     },
     {
