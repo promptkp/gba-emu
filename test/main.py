@@ -28,7 +28,7 @@ tests = [
             mov     r0, #1
         """,
         "checks": [
-            reg_equal("r0", 1),
+            RegEqual("r0", 1),
         ],
     },
     {
@@ -37,18 +37,24 @@ tests = [
             mov     r0, #0x00011000
         """,
         "checks": [
-            reg_equal("r0", 0x00011000),
+            RegEqual("r0", 0x00011000),
         ],
     },
     {
-        "name": "test_one_mov_reg",
+        "name": "test_mov_chain",
         "assembly": """
             mov     r0, #1
             mov     r1, r0
+            mov     r2, r1
+            mov     r3, r2
+            mov     r4, r2
         """,
         "checks": [
-            reg_equal("r0", 1),
-            reg_equal("r1", 1),
+            RegEqual("r0", 1),
+            RegEqual("r1", 1),
+            RegEqual("r2", 1),
+            RegEqual("r3", 1),
+            RegEqual("r4", 1),
         ],
     },
     {
@@ -59,7 +65,7 @@ tests = [
             mov     r2, r0, lsl r1
         """,
         "checks": [
-            reg_equal("r2", 1 << 4)
+            RegEqual("r2", 1 << 4)
         ],
     },
     {
@@ -69,7 +75,7 @@ tests = [
             mov     r1, r0, lsl #4
         """,
         "checks": [
-            reg_equal("r1", 1 << 4)
+            RegEqual("r1", 1 << 4)
         ],
     },
 ]
@@ -88,14 +94,14 @@ for test in tests:
         failed_tests.append(name)
         continue
 
-    test_output = run_bin(name, test_bin)
+    test_output_file_name = run_bin(name, test_bin)
 
-    if test_output is None:
+    if test_output_file_name is None:
         print(f"Error running binary {name}, skipping")
         failed_tests.append(name)
         continue
 
-    ok = run_checks(test_output, checks)
+    ok = run_checks(test_output_file_name, checks)
     if not ok:
         print(f"Checks failed for {name}, skipping")
         failed_tests.append(name)
@@ -108,4 +114,4 @@ if len(failed_tests) == 0:
 else:
     print(f"{len(failed_tests)} tests failed.")
 
-clean_up_tmp_dir()
+# clean_up_tmp_dir()

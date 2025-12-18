@@ -33,14 +33,14 @@ int main(int argc, char *argv[]) {
   // move g back to (begin + 0), i.e., start of file
   test_stream.seekg(0, std::ios::beg);
 
-  std::vector<std::byte> buffer(size);
+  std::vector<std::uint8_t> buffer(size);
 
   if (!test_stream.read(reinterpret_cast<char*>(buffer.data()), size)) {
     std::cerr << "Failed to read file" << std::endl;
   }
 
-  CPU cpu{};
+  CPU cpu{buffer};
 
-  cpu.RunTest(buffer);
+  cpu.RunTest();
   cpu.PrintRegister();
 }

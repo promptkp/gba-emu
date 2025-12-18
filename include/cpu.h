@@ -27,9 +27,9 @@ enum class OperatingMode {
 // 16.7772 MHz
 class CPU {
 public:
-  CPU();
+  CPU(std::vector<uint8_t> &buffer);
 
-  void RunTest(std::vector<std::byte> &buffer);
+  void RunTest();
 
   // For testing
   void PrintRegister();
@@ -42,6 +42,8 @@ public:
 
   // Perform fetch, decode, and execute
   void Step();
+
+  bool IsDone();
 
   // Section 2.6
   // State and mode defines accesible registers
@@ -59,6 +61,7 @@ public:
   void HandleException();
 
 private:
+  std::vector<std::uint8_t> &buffer_;
   /*
    * Registers (section 2.6)
    * 0-15 => r0-r15
@@ -166,6 +169,8 @@ private:
   void ExecuteMOV(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
   void ExecuteBIC(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
   void ExecuteMVN(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit);
+
+  uint32_t InterpretShifterOp(uint16_t shifter_operand, bool i_bit);
 
   using DataProcessingExecutorPointer = void (CPU::*)(uint8_t, uint8_t, uint16_t, bool, bool);
   struct DataProcessingExecutor {

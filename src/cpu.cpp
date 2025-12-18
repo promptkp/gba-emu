@@ -1,26 +1,54 @@
 #include <cpu.h>
 #include <iostream>
 
-CPU::CPU() {
-
+CPU::CPU(std::vector<uint8_t> &buffer) : buffer_{buffer},
+  general_registers_{}, spsr_banks_{} {
+  for (int i = 0; i < buffer.size(); ++i) {
+    std::cout << std::hex << static_cast<int>(buffer[i]) << std::endl;
+  }
+  std::cout << "break" << std::endl;
 }
 
 uint32_t CPU::ReadStatusReg(OperatingMode mode) {return 0;}
-uint32_t CPU::ReadReg(uint8_t reg, OperatingMode mode) {return 0;}
 uint32_t CPU::ReadCPSR() {return 0;}
 
-void CPU::RunTest(std::vector<std::byte> &buffer) {
+uint32_t CPU::ReadReg(uint8_t reg, OperatingMode mode) {
+  if (reg > 15) {
+    std::cerr << "Reg must be <= 15" << std::endl;
+  }
+  if (mode == OperatingMode::User || mode == OperatingMode::System) {
+    return general_registers_[reg];
+  } else {
+    // todo: read reg for other modes
+    return -1;
+  }
 }
+
+uint32_t CPU::ReadReg(uint8_t reg) {
+  return ReadReg(reg, operating_mode_);
+}
+
+bool CPU::IsDone() {
+  return ReadReg(15) >= buffer_.size();
+}
+
+void CPU::RunTest() {
+  while (!IsDone()) {
+    Step();
+  }
+}
+
+#define PrintRegisterPrefix ("REG,")
 
 void CPU::PrintRegister() {
   // 16 regs
   for (int i = 0; i < 16; ++i) {
-    std::cout << "r" << i << "," << ReadReg(i, OperatingMode::User) << std::endl;
+    std::cout << PrintRegisterPrefix << "r" << i << "," << ReadReg(i, OperatingMode::User) << std::endl;
   }
 
   // 5 regs
   for (int i = 8; i <= 12; ++i) {
-    std::cout << "r" << i << "_fiq," << ReadReg(i, OperatingMode::FastInterrupt) << std::endl;
+    std::cout << PrintRegisterPrefix << "r" << i << "_fiq," << ReadReg(i, OperatingMode::FastInterrupt) << std::endl;
   }
 
   std::pair<OperatingMode, std::string> r13_14_spsr_banked_mode[] = {
@@ -34,28 +62,87 @@ void CPU::PrintRegister() {
   // 5 * 3 = 15 regs
   for (auto &[mode, name] : r13_14_spsr_banked_mode) {
     for (int i = 13; i <= 14; ++i) {
-      std::cout << "r" << i << "_" << name << "," << ReadReg(i, mode) << std::endl;;
+      std::cout << PrintRegisterPrefix << "r" << i << "_" << name << "," << ReadReg(i, mode) << std::endl;;
     }
 
-    std::cout << "spsr" << "_" << name << "," << ReadStatusReg(mode) << std::endl;
+    std::cout << PrintRegisterPrefix << "spsr" << "_" << name << "," << ReadStatusReg(mode) << std::endl;
   }
 
   // 1 reg
-  std::cout << "cpsr" << "," << ReadCPSR() << std::endl;
+  std::cout << PrintRegisterPrefix << "cpsr" << "," << ReadCPSR() << std::endl;
+}
+
+
+void CPU::Step() {
+  Fetch();
+  DecodeAndExecute();
+}
+
+
+void CPU::WriteReg(uint8_t reg, OperatingMode mode, uint32_t val) {
+  if (reg > 15) {
+    std::cerr << "WriteReg: reg must be <= 15" << std::endl;
+  }
+  if (mode == OperatingMode::User || mode == OperatingMode::System) {
+    general_registers_[reg] = val;
+  } else {
+    // todo: other mode
+    std::cerr << "WriteReg: not implemented" << std::endl;
+  }
+}
+
+void CPU::WriteReg(uint8_t reg, uint32_t val) {
+  WriteReg(reg, operating_mode_, val);
+}
+
+void CPU::Fetch() {
+  uint8_t instr_size_bytes;
+  if (operating_state_ == OperatingState::ARM) {
+    instr_size_bytes = 4;
+  } else {
+    instr_size_bytes = 2;
+  }
+
+  uint32_t pc = ReadReg(15);
+  if (pc + instr_size_bytes - 1 >= buffer_.size()) {
+    std::cerr << "PC is invalid (too large); aborting..." << std::endl;
+    exit(1);
+  }
+
+  encoded_instr_ = 0;
+  for (int i = 0; i < instr_size_bytes; ++i) {
+    // fix endian
+    encoded_instr_ |= (uint32_t)buffer_[pc++] << (8 * i);
+  }
+
+  // todo: check when i should update PC. for now update after fetch but this
+  // will have side effect if current instr reads from PC.
+  WriteReg(15, pc);
+
+  std::cout << encoded_instr_ << std::endl;
 }
 
 void CPU::DecodeAndExecute() {
-  cond_ = encoded_instr_ >> 28;
-  if (cond_ == 0xF) {
-    std::cerr << "Warning cond is 0b1111; instruction is unpredictable (section A3.2.1)" << std::endl;
-  }
-
-  for (const auto& [mask, target, handler] : handlers_) {
-    if ((encoded_instr_ & mask) == target) {
-      (this->*handler)();
+  if (operating_state_ == OperatingState::ARM) {
+    // todo: check cond here
+    cond_ = encoded_instr_ >> 28;
+    if (cond_ == 0xF) {
+      std::cerr << "Warning cond is 0b1111; instruction is unpredictable (section A3.2.1)" << std::endl;
     }
+
+    for (const auto& [mask, target, handler] : handlers_) {
+      if ((encoded_instr_ & mask) == target) {
+        std::cout << std::hex << encoded_instr_  << " " << mask << " " <<
+          (encoded_instr_ & mask) << " " << target << std::dec << std::endl;
+        (this->*handler)();
+        return;
+      }
+    }
+    std::cerr << "Unknown instr: " << std::hex << encoded_instr_ << std::dec << std::endl;
+  } else {
+    // todo: decode and execute in thumb mode
+    std::cerr << "Thumb mode decode and execute not implemented" << std::endl;
   }
-  std::cerr << "Unknown instr: " << encoded_instr_ << std::endl;
 }
 
 void CPU::HandleSoftwareInterrupt() {
@@ -198,6 +285,7 @@ void CPU::HandleDataProcessing() {
   for (const auto& [mask, target, executor] : psr_transfer_executor) {
     if ((encoded_instr_ & mask) == target) {
       (this->*executor)();
+      return;
     }
   }
 
@@ -220,7 +308,86 @@ void CPU::ExecuteTEQ(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, boo
 void CPU::ExecuteCMP(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit) {}
 void CPU::ExecuteCMN(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit) {}
 void CPU::ExecuteORR(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit) {}
-void CPU::ExecuteMOV(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit) {}
+
+uint32_t rotateRight(uint32_t base, uint32_t shift) {
+  uint32_t low_mask = (1 << shift) - 1;
+
+  // low is shift least significant bits
+  uint32_t low = base & low_mask;
+  
+  // right shift everything and put low at most significant bits
+  return (base >> shift) | (low << (31 - shift));
+}
+
+uint32_t CPU::InterpretShifterOp(uint16_t shifter_operand, bool i_bit) {
+  if (i_bit) {
+    uint32_t imm = shifter_operand & 0xFF;
+    uint32_t shift = ((shifter_operand >> 8) & 0xF) << 1;
+    return rotateRight(imm, shift);
+  } else {
+    bool is_shift_by_register = (shifter_operand >> 4) & 1;
+
+    // 0 = LSL, 1 = LSR, 2 = ASR, 3 = ROR
+    uint32_t shift_type = (shifter_operand >> 5) & 0b11;
+
+    uint32_t base_reg_val = ReadReg(shifter_operand & 0xF);
+
+    uint32_t shift_amount;
+
+    // Compute shift_amount for each case
+    if (is_shift_by_register) {
+      if ((shifter_operand >> 7) & 1) {
+        std::cerr << "7th bit of shifter operand is reserved (must be zero) if shifting by register" << std::endl;
+        exit(1);
+      }
+      
+      uint16_t shift_register = (shifter_operand >> 8) & 0xF;
+      if (shift_register == 15) {
+        std::cerr << "shift register cannot be r15 in shifter operand" << std::endl;
+        exit(1);
+      }
+
+      shift_amount = ReadReg(shift_register) & 0xFF;
+    } else {
+      shift_amount = (shifter_operand >> 7) & 0x1F;
+
+      if (shift_amount == 0) {
+        // todo: handle special case
+        std::cerr << "warning case where shift_amount is zero immediate is not implemented" << std::endl;
+        exit(1);
+      }
+    }
+
+    switch (shift_type) {
+      // LSL
+      case 0:
+        return base_reg_val << shift_amount;
+      // LSR
+      case 1:
+        return base_reg_val >> shift_amount;
+      // ASR
+      case 2:
+        return static_cast<uint32_t>(static_cast<int>(base_reg_val) >> shift_amount);
+      // ROR
+      default:
+        return rotateRight(base_reg_val, shift_amount);
+    }
+  }
+}
+
+void CPU::ExecuteMOV(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit) {
+  if (reg_n != 0) {
+    std::cerr << "reg_n must be zero for mov; aborting..." << std::endl;
+    exit(1);
+  }
+  if (s_bit == 1) {
+    // todo: mov s_bit == 1
+    std::cerr << "mov s_bit == 1 not implemented" << std::endl;
+  }
+
+  uint32_t val = InterpretShifterOp(shifter_operand, i_bit);
+  WriteReg(reg_d, val);
+}
 void CPU::ExecuteBIC(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit) {}
 void CPU::ExecuteMVN(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit) {}
 

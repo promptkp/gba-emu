@@ -50,8 +50,10 @@ def compile(name, assembly):
 
     return raw_file
 
-def reg_equal(src, expected):
-    pass
+class RegEqual:
+    def __init__(self, reg, val):
+        self.reg = reg
+        self.val = val
 
 def run_bin(name, bin):
     """
@@ -73,6 +75,24 @@ def run_bin(name, bin):
 
     return output_file
 
-# todo: Implement
-def run_checks(output, checks):
+def parse_output(output_lines):
+    tmp = []
+    for line in output_lines:
+        tokens = line.strip().split(',')
+        if tokens[0] != "REG":
+            continue
+        tmp.append(tokens[1:])
+    return {reg: int(val) for [reg, val] in tmp}
+
+def run_checks(output_file_name, checks):
+    with open(output_file_name, 'r') as f:
+        output_lines = f.readlines()
+        reg_map = parse_output(output_lines)
+
+    for check in checks:
+        if isinstance(check, RegEqual):
+            if reg_map[check.reg] != check.val:
+                print(f"{check.reg} expected {check.val} but got {reg_map[check.reg]}")
+                return False
+
     return True
