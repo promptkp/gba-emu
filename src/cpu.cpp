@@ -319,6 +319,10 @@ uint32_t rotateRight(uint32_t base, uint32_t shift) {
   return (base >> shift) | (low << (32 - shift));
 }
 
+uint32_t CPU::GetCFlag() {
+  return (cpsr_ >> 29) & 1;
+}
+
 uint32_t CPU::InterpretShifterOp(uint16_t shifter_operand, bool i_bit) {
   if (i_bit) {
     uint32_t imm = shifter_operand & 0xFF;
@@ -353,11 +357,19 @@ uint32_t CPU::InterpretShifterOp(uint16_t shifter_operand, bool i_bit) {
       shift_amount = (shifter_operand >> 7) & 0x1F;
 
       if (shift_amount == 0) {
-        // todo: handle special case
-        std::cerr << "instr: " << std::hex << encoded_instr_ << std::dec << std::endl;
-        std::cerr << "pc: " << std::hex << ReadReg(15) << std::dec << std::endl;
-        std::cerr << "warning case where shift_amount is zero immediate is not implemented" << std::endl;
-        exit(1);
+        switch (shift_type) {
+          case 0:
+            return base_reg_val;
+          case 1:
+            // todo: if s_flag is set, C flag becomes bit 31 of base_reg_val
+            return 0;
+          case 2:
+            // todo: if s_flag is set, C flag becomes bit 31 of base_reg_val
+            return (base_reg_val >> 31) & 1;
+          default:
+            // todo: if s_flag is set, C flag becomes bit 0 of base_reg_val
+            return (base_reg_val >> 1) | (GetCFlag() << 31);
+        }
       }
     }
 

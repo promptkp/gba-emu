@@ -95,6 +95,7 @@ private:
    * bit 4-0 => Modes (Table 2-2)
    */
   uint32_t cpsr_; // Current Program Status Registers
+  uint32_t GetCFlag();
 
   // State and Mode
   OperatingState operating_state_;
