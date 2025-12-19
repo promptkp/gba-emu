@@ -316,13 +316,14 @@ uint32_t rotateRight(uint32_t base, uint32_t shift) {
   uint32_t low = base & low_mask;
   
   // right shift everything and put low at most significant bits
-  return (base >> shift) | (low << (31 - shift));
+  return (base >> shift) | (low << (32 - shift));
 }
 
 uint32_t CPU::InterpretShifterOp(uint16_t shifter_operand, bool i_bit) {
   if (i_bit) {
     uint32_t imm = shifter_operand & 0xFF;
     uint32_t shift = ((shifter_operand >> 8) & 0xF) << 1;
+    std::cout << "shifter_op imm " << imm << " shift " << shift << std::endl;
     return rotateRight(imm, shift);
   } else {
     bool is_shift_by_register = (shifter_operand >> 4) & 1;
@@ -353,6 +354,8 @@ uint32_t CPU::InterpretShifterOp(uint16_t shifter_operand, bool i_bit) {
 
       if (shift_amount == 0) {
         // todo: handle special case
+        std::cerr << "instr: " << std::hex << encoded_instr_ << std::dec << std::endl;
+        std::cerr << "pc: " << std::hex << ReadReg(15) << std::dec << std::endl;
         std::cerr << "warning case where shift_amount is zero immediate is not implemented" << std::endl;
         exit(1);
       }
