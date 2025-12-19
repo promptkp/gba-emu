@@ -1,3 +1,11 @@
+## TODO (general)
+ - difference between pragma once, and ifndef def at the start of header files.
+ - cycle timing for cpu (and how to test)
+
+## TODO (testing)
+ - use pytest
+ - tests for MOV instruction
+
 ## TODO (CPU)
  * Instruction decoding (in progress)
  [ ] SWI
@@ -49,5 +57,3 @@
  * CPU fetches
  * CPU executes
  * CPU memory
-
- - difference between pragma once, and ifndef def at the start of header files.
