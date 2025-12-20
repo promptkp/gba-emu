@@ -3,3 +3,4 @@ obj/
 .clangd
 *__pycache__*
 tmp*
+test_results*

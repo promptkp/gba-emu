@@ -2,28 +2,52 @@ from pathlib import Path
 import os
 import shutil
 import subprocess
+import pytest
 
+TEST_RESULT_DIR = "test_results"
 TMP_BIN_DIR = "tmp_bin_dir"
 TEST_CPU_BIN = "bin/test_cpu"
 
-def remove_old_and_create_new_tmp_dir():
-    tmp_bin_dir = Path(TMP_BIN_DIR)
+def overwrite_dir(dir_name):
+    tmp_bin_dir = Path(dir_name)
     if tmp_bin_dir.is_dir():
         shutil.rmtree(tmp_bin_dir)
     os.mkdir(tmp_bin_dir)
 
-def clean_up_tmp_dir():
-    tmp_bin_dir = Path(TMP_BIN_DIR)
+def cleanup_dir(dir_name):
+    tmp_bin_dir = Path(dir_name)
     if tmp_bin_dir.is_dir():
         shutil.rmtree(tmp_bin_dir)
 
-def compile(name, assembly):
+@pytest.fixture(scope="session")
+def shared_dir():
+    overwrite_dir(TEST_RESULT_DIR)
+    yield Path(TEST_RESULT_DIR)
+
+@pytest.fixture
+def output_dir(shared_dir, request):
+    test_dir = shared_dir / request.node.name
+    test_dir.mkdir(exist_ok=True)
+    return test_dir
+
+def run_test(output_dir, assembly, checks):
+    bin_path = compile(output_dir, assembly)
+    cpu_output_path = run_bin(output_dir, bin_path)
+    run_checks(cpu_output_path, checks)
+
+def remove_old_and_create_new_tmp_dir():
+    overwrite_dir(TMP_BIN_DIR)
+
+def clean_up_tmp_dir():
+    cleanup_dir(TMP_BIN_DIR)
+
+def compile(output_dir, assembly):
     """
     Returns output binary name
     """
-    assembly_file = Path(TMP_BIN_DIR, name + "_assembly")
-    elf_file = Path(TMP_BIN_DIR, name + "_elf")
-    raw_file = Path(TMP_BIN_DIR, name + "_raw")
+    assembly_file = output_dir / "assembly"
+    elf_file = output_dir / "elf"
+    raw_file = output_dir / "raw"
 
     # Write assembly to file
     with open(assembly_file, "w") as f:
@@ -34,19 +58,14 @@ def compile(name, assembly):
     )
 
     if result.returncode != 0:
-        print(f"{name}: Failed to compile")
-        print(f"{name}: Assembly file content:")
-        with open(assembly_file, "r") as f:
-            print(f.read())
-        return None
+        pytest.fail("Compile failed")
 
     result = subprocess.run(
         ["arm-none-eabi-objcopy", "-O", "binary", elf_file, raw_file]
     )
 
     if result.returncode != 0:
-        print(f"{name}: Failed to convert ELF to machine code")
-        return None
+        pytest.fail("ELF to machine code failed")
 
     return raw_file
 
@@ -55,11 +74,11 @@ class RegEqual:
         self.reg = reg
         self.val = val
 
-def run_bin(name, bin):
+def run_bin(output_dir, bin):
     """
     Returns output file name
     """
-    output_file = Path(TMP_BIN_DIR, name + "_output")
+    output_file = output_dir / "cpu_output"
     result = subprocess.run(
         [Path(TEST_CPU_BIN), bin],
         capture_output=True,
@@ -67,8 +86,7 @@ def run_bin(name, bin):
     )
 
     if result.returncode != 0:
-        print(f"{name}: Failed when running binary")
-        return None
+        pytest.fail("Failed when running binary")
 
     with open(output_file, "w") as f:
         f.write(result.stdout)
@@ -92,7 +110,6 @@ def run_checks(output_file_name, checks):
     for check in checks:
         if isinstance(check, RegEqual):
             if reg_map[check.reg] != check.val:
-                print(f"{check.reg} expected {check.val} but got {reg_map[check.reg]}")
-                return False
-
-    return True
+                pytest.fail(f"{check.reg} expected {check.val} but got {reg_map[check.reg]}")
+        else:
+            raise NotImplementedError

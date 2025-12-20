@@ -37,4 +37,4 @@ $(TEST_CPU_TARGET): $(COMMON_OBJECTS) $(OBJ_DIR)/test_cpu.o
 	$(CXX) $^ -o $@
 
 test: test_cpu
-	python test/main.py
+	pytest
