@@ -109,7 +109,7 @@ def test_mov_reg_lsr_imm_zero(output_dir):
     assembly, checks = (
         """
             mov     r0, #0x80000000
-            movs    r1, r0, lsr #0
+            movs    r1, r0, lsr #32
         """,
         [
             RegEqual("r1", 0),
@@ -122,7 +122,7 @@ def test_mov_reg_lsr_imm_zero_c_zero(output_dir):
     assembly, checks = (
         """
             mov     r2, #0x00000001
-            movs    r3, r2, lsr #0
+            movs    r3, r2, lsr #32
         """,
         [
             RegEqual("r3", 0),
@@ -131,4 +131,55 @@ def test_mov_reg_lsr_imm_zero_c_zero(output_dir):
     run_test(output_dir, assembly, checks)
 
 
+def test_mov_reg_asr_imm_zero_c_one(output_dir):
+    assembly, checks = (
+        """
+            mov     r2, #0x80000000
+            movs    r3, r2, asr #32
+        """,
+        [
+            RegEqual("r3", 0xFFFFFFFF),
+            RegEqual("c", 1),
+        ])
+    run_test(output_dir, assembly, checks)
 
+
+def test_mov_reg_asr_imm_zero_c_zero(output_dir):
+    assembly, checks = (
+        """
+            mov     r2, #0x00000001
+            movs    r3, r2, asr #32
+        """,
+        [
+            RegEqual("r3", 0),
+            RegEqual("c", 0),
+        ])
+    run_test(output_dir, assembly, checks)
+
+
+def test_mov_reg_rrx_no_c(output_dir):
+    assembly, checks = (
+        """
+            mov     r2, #0x80000001
+            movs    r3, r2, rrx #1
+        """,
+        [
+            RegEqual("r3", 0x40000000),
+            RegEqual("c", 1),
+        ])
+    run_test(output_dir, assembly, checks)
+
+
+def test_mov_reg_rrx_with_c(output_dir):
+    assembly, checks = (
+        """
+            mov     r0, #0x80000000
+            movs    r1, r0, asr #32 ; set c to 1
+            mov     r2, #0x80000001
+            movs    r3, r2, rrx #1
+        """,
+        [
+            RegEqual("r3", 0xC0000000),
+            RegEqual("c", 1),
+        ])
+    run_test(output_dir, assembly, checks)
