@@ -1,5 +1,18 @@
 from utils import *
 
+"""
+Test schemes:
+
+op2: base imm, base reg
+
+(done) base imm: shfited, not shifted
+
+base reg:
+op2 base reg: pc, r0-14
+shift type: 0 1 2 3
+shift type/amount: imm 0, imm 1-31, reg 0, reg 1-31, reg 32, reg > 32, reg >= 256
+"""
+
 def test_mov_imm(output_dir):
     assembly, checks = (
         """
@@ -62,20 +75,47 @@ def test_mov_reg_lsl_reg(output_dir):
             mov     r2, r0, lsl r1
         """,
         [
-            RegEqual("r2", 1 << 4)
+            RegEqual("r2", 1 << 4),
         ])
     run_test(output_dir, assembly, checks)
 
 
-def test_mov_reg_lsl_imm(output_dir):
+def test_mov_reg_lsl_imm_non_zero(output_dir):
     assembly, checks = (
         """
             mov     r0, #1
             mov     r1, r0, lsl #4
         """,
         [
-            RegEqual("r1", 1 << 4)
+            RegEqual("r1", 1 << 4),
         ])
     run_test(output_dir, assembly, checks)
+
+
+
+def test_mov_reg_lsl_imm_zero(output_dir):
+    assembly, checks = (
+        """
+            mov     r0, #1
+            mov     r1, r0, lsl #0
+        """,
+        [
+            RegEqual("r1", 1),
+        ])
+    run_test(output_dir, assembly, checks)
+
+
+def test_mov_reg_lsr_imm_zero(output_dir):
+    assembly, checks = (
+        """
+            mov     r0, #0x80000000
+            movs    r1, r0, lsr #0
+        """,
+        [
+            RegEqual("r1", 0),
+            RegEqual("c", 1),
+        ])
+    run_test(output_dir, assembly, checks)
+
 
 

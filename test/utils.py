@@ -35,12 +35,6 @@ def run_test(output_dir, assembly, checks):
     cpu_output_path = run_bin(output_dir, bin_path)
     run_checks(cpu_output_path, checks)
 
-def remove_old_and_create_new_tmp_dir():
-    overwrite_dir(TMP_BIN_DIR)
-
-def clean_up_tmp_dir():
-    cleanup_dir(TMP_BIN_DIR)
-
 def compile(output_dir, assembly):
     """
     Returns output binary name
@@ -93,13 +87,39 @@ def run_bin(output_dir, bin):
 
     return output_file
 
+def get_bit(x, bit_pos):
+    return (x >> bit_pos) & 1
+
 def parse_output(output_lines):
     tmp = []
     for line in output_lines:
         tokens = line.strip().split(',')
         if tokens[0] != "REG":
             continue
-        tmp.append(tokens[1:])
+        if tokens[1] == "cpsr":
+            val = int(tokens[2])
+            flags = [
+                (31, "n"),
+                (30, "z"),
+                (29, "c"),
+                (28, "v"),
+                (27, "q"),
+                (24, "j"),
+                (9, "e"),
+                (8, "a"),
+                (7, "i"),
+                (6, "f"),
+                (5, "t"),
+                (4, "m4"),
+                (3, "m3"),
+                (2, "m2"),
+                (1, "m1"),
+                (0, "m0"),
+            ]
+            for bit_pos, flag in flags:
+                tmp.append([flag, get_bit(val, bit_pos)])
+        else:
+            tmp.append(tokens[1:])
     return {reg: int(val) for [reg, val] in tmp}
 
 def run_checks(output_file_name, checks):
