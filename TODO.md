@@ -1,9 +1,9 @@
 ## TODO (general)
+ - debug print/logger
  - difference between pragma once, and ifndef def at the start of header files.
  - cycle timing for cpu (and how to test)
 
 ## TODO (testing)
- - use pytest
  - tests for MOV instruction
 
 ## TODO (CPU)
