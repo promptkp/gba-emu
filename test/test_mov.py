@@ -118,4 +118,17 @@ def test_mov_reg_lsr_imm_zero(output_dir):
     run_test(output_dir, assembly, checks)
 
 
+def test_mov_reg_lsr_imm_zero_c_zero(output_dir):
+    assembly, checks = (
+        """
+            mov     r2, #0x00000001
+            movs    r3, r2, lsr #0
+        """,
+        [
+            RegEqual("r3", 0),
+            RegEqual("c", 0),
+        ])
+    run_test(output_dir, assembly, checks)
+
+
 
