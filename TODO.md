@@ -1,9 +1,11 @@
-## TODO (general)
+## TODO (general, ordered by priority)
  - debug print/logger
+ - implement s instructions (modify flags)
  - difference between pragma once, and ifndef def at the start of header files.
  - cycle timing for cpu (and how to test)
 
 ## TODO (testing)
+ - tests for shifter operand
  - tests for MOV instruction
 
 ## TODO (CPU)
