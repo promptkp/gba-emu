@@ -53,7 +53,7 @@ def test_shifter_op_imm_value(output_dir):
 def test_shifter_op_imm_rotate_zero_set_c(output_dir):
     assembly, checks = (
         f"""
-            SET_C_FLAG
+            {SET_C_FLAG}
             movs    r0, #0x000000FF
         """,
         [
@@ -90,7 +90,7 @@ def test_shifter_op_imm_rotate_non_zero_set_c(output_dir):
 def test_shifter_op_imm_rotate_non_zero_clear_c(output_dir):
     assembly, checks = (
         f"""
-            SET_C_FLAG
+            {SET_C_FLAG}
             movs    r0, #0x8F000000
         """,
         [
