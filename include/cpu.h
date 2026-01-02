@@ -78,8 +78,8 @@ private:
    */
   static constexpr std::size_t kNumGeneralRegisters = 31;
   static constexpr std::size_t kNumStatusRegisters = 5; // only Saved Program Status Registers (SPSR)
-  std::array<uint32_t, kNumGeneralRegisters> general_registers_;
-  std::array<uint32_t, kNumStatusRegisters> spsr_banks_;
+  std::array<uint32_t, kNumGeneralRegisters> general_registers_{};
+  std::array<uint32_t, kNumStatusRegisters> spsr_banks_{};
 
   /*
    * Section 2.7.2
@@ -94,15 +94,16 @@ private:
    * bit 5 => Thumb state
    * bit 4-0 => Modes (Table 2-2)
    */
-  uint32_t cpsr_; // Current Program Status Registers
-  uint32_t GetCFlag();
+  uint32_t cpsr_ = 0; // Current Program Status Registers
 
   // State and Mode
-  OperatingState operating_state_;
-  OperatingMode operating_mode_;
+  OperatingState operating_state_{OperatingState::ARM};
+  OperatingMode operating_mode_{OperatingMode::User};
 
-  uint32_t encoded_instr_;
-  uint8_t cond_;
+  uint32_t encoded_instr_{0};
+  uint8_t cond_{0};
+
+  uint32_t GetCFlag();
 
   // The pipeline is encoded instruction -> handler -> executor
   void HandleSoftwareInterrupt();

@@ -14,22 +14,6 @@ def overwrite_dir(dir_name):
         shutil.rmtree(tmp_bin_dir)
     os.mkdir(tmp_bin_dir)
 
-def cleanup_dir(dir_name):
-    tmp_bin_dir = Path(dir_name)
-    if tmp_bin_dir.is_dir():
-        shutil.rmtree(tmp_bin_dir)
-
-@pytest.fixture(scope="session")
-def shared_dir():
-    overwrite_dir(TEST_RESULT_DIR)
-    yield Path(TEST_RESULT_DIR)
-
-@pytest.fixture
-def output_dir(shared_dir, request):
-    test_dir = shared_dir / request.node.name
-    test_dir.mkdir(exist_ok=True)
-    return test_dir
-
 def run_test(output_dir, assembly, checks):
     bin_path = compile(output_dir, assembly)
     cpu_output_path = run_bin(output_dir, bin_path)

@@ -2,8 +2,7 @@ from utils import *
 
 # first test a simple way to set c flag to 1 and 0
 
-def set_c_flag():
-    return "movs r0, #0x80000000\n"
+SET_C_FLAG = "movs r0, #0x80000000\n"
 
 def test_shifter_op_set_c_flag(output_dir):
     assembly, checks = (
@@ -54,7 +53,7 @@ def test_shifter_op_imm_value(output_dir):
 def test_shifter_op_imm_rotate_zero_set_c(output_dir):
     assembly, checks = (
         f"""
-            {set_c_flag()}
+            SET_C_FLAG
             movs    r0, #0x000000FF
         """,
         [
@@ -91,7 +90,7 @@ def test_shifter_op_imm_rotate_non_zero_set_c(output_dir):
 def test_shifter_op_imm_rotate_non_zero_clear_c(output_dir):
     assembly, checks = (
         f"""
-            {set_c_flag()}
+            SET_C_FLAG
             movs    r0, #0x8F000000
         """,
         [

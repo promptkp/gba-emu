@@ -1,12 +1,13 @@
 #include <cpu.h>
 #include <iostream>
 
-CPU::CPU(std::vector<uint8_t> &buffer) : buffer_{buffer},
-  general_registers_{}, spsr_banks_{} {
+CPU::CPU(std::vector<uint8_t> &buffer) : buffer_{buffer} {
+  /*
   for (int i = 0; i < buffer.size(); ++i) {
-    std::cout << std::hex << static_cast<int>(buffer[i]) << std::endl;
+    std::cout << std::hex << static_cast<int>(buffer[i]) << std::dec << std::endl;
   }
-  std::cout << "break" << std::endl;
+  */
+  std::cout << "Constructor done" << std::endl;
 }
 
 uint32_t CPU::ReadStatusReg(OperatingMode mode) {return 0;}
@@ -74,6 +75,7 @@ void CPU::PrintRegister() {
 
 
 void CPU::Step() {
+  std::cout << "step" << std::endl;
   Fetch();
   DecodeAndExecute();
 }
@@ -119,11 +121,12 @@ void CPU::Fetch() {
   // will have side effect if current instr reads from PC.
   WriteReg(15, pc);
 
-  std::cout << encoded_instr_ << std::endl;
+  std::cout << "Fetched instr = " << std::hex << encoded_instr_ << std::dec << std::endl;
 }
 
 void CPU::DecodeAndExecute() {
   if (operating_state_ == OperatingState::ARM) {
+    std::cout << "DecodeAndExecute (arm state)" << std::endl;
     // todo: check cond here
     cond_ = encoded_instr_ >> 28;
     if (cond_ == 0xF) {
@@ -132,7 +135,8 @@ void CPU::DecodeAndExecute() {
 
     for (const auto& [mask, target, handler] : handlers_) {
       if ((encoded_instr_ & mask) == target) {
-        std::cout << std::hex << encoded_instr_  << " " << mask << " " <<
+	std::cout << "DecodeAndExecute: ";
+        std::cout << std::hex << "Encoded instr = " << encoded_instr_  << " mask = " << mask << " " <<
           (encoded_instr_ & mask) << " " << target << std::dec << std::endl;
         (this->*handler)();
         return;
@@ -289,6 +293,8 @@ void CPU::HandleDataProcessing() {
     }
   }
 
+
+  std::cout << "HandleDataProcessing: " << "calling executor opcode = " << opcode << std::endl;
   (this->*data_processing_executors_[opcode])(reg_d, reg_n, shifter_operand, i_bit, s_bit);
 }
 
@@ -401,6 +407,8 @@ void CPU::ExecuteMOV(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, boo
   }
 
   uint32_t val = InterpretShifterOp(shifter_operand, i_bit);
+
+  std::cout << "Execute mov: reg_d " << reg_d << " val " << val << std::endl;
   WriteReg(reg_d, val);
 }
 void CPU::ExecuteBIC(uint8_t reg_d, uint8_t reg_n, uint16_t shifter_operand, bool i_bit, bool s_bit) {}

@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++20 -g -Wall -Iinclude $(shell pkg-config --cflags sdl3)
+CXXFLAGS = -std=c++20 -g -Wall -Wextra -Iinclude $(shell pkg-config --cflags sdl3)
 LDFLAGS = $(shell pkg-config --libs sdl3)
 
 # Directories
